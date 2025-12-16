@@ -1,5 +1,7 @@
 # PWA Scope Fixer
 
+[![Available in the Chrome Web Store](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/i73889FkxmYyBgJX2d4A.png)](https://chromewebstore.google.com/detail/paddiikjoldefcflfofcjldejikppcca)
+
 **PWA Scope Fixer** is a Chrome/Chromium extension designed to fix Progressive Web App (PWA) scope issues, specifically addressing the problem where the browser address bar remains visible or the PWA scope is too restricted (e.g., when installing a PWA from a subdirectory).
 
 It allows you to inject a dynamic web manifest with a custom `start_url` and `display: standalone` property, forcing the browser to treat the site as a proper PWA with the correct scope.
@@ -27,6 +29,11 @@ Sometimes when you install a PWA (e.g., from a specific page like `example.com/a
 This extension solves this by letting you define the `start_url` (e.g., to the root `example.com/` or any other path) and injecting a correct manifest before you install it.
 
 ## Installation
+
+### Chrome Web Store
+[**Download PWA Scope Fixer**](https://chromewebstore.google.com/detail/paddiikjoldefcflfofcjldejikppcca)
+
+### Manual Installation (from source)
 
 1. Clone this repository.
 2. Install dependencies with [Bun](https://bun.sh/):
