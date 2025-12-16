@@ -64,7 +64,7 @@ This project uses [Bun](https://bun.sh/) and [React](https://react.dev/).
 - **Install dependencies**: `bun install`
 - **Watch mode (Hot Reload)**: `bun run dev`
 - **Build for production**: `bun run build`
-- **Package (.zip)**: `bun run pack`
+- **Package (.zip)**: `bun run pack` (Create a zip file for distribution)
 
 ## Credits
 
