@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    @apply text-slate-900 bg-slate-50 font-sans text-sm;
+  }
+
+  body {
+    @apply w-[450px] m-0 p-0 overflow-hidden;
+  }
+}

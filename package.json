@@ -1,0 +1,24 @@
+{
+  "name": "bun-react-extension",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run build.ts --watch",
+    "start": "bun run build.ts --watch",
+    "build": "bun run build.ts",
+    "pack": "bun run build.ts && cd dist && zip -r extension.zip ."
+  },
+  "dependencies": {
+    "bun-plugin-tailwind": "^0.1.2",
+    "react": "^19",
+    "react-dom": "^19",
+    "tailwindcss": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/chrome": "^0.1.32",
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
+  }
+}
