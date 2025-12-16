@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PWA Scope Fixer",
   "version": "1.0.0",
-  "description": "Fix PWA address bar by injecting dynamic manifest with custom scope",
+  "description": "> Fix PWA address bar issues by injecting a custom manifest. Customize app name, scope, colors, and force standalone mode easily.",
   "permissions": [
     "activeTab",
     "scripting",
