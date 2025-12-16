@@ -29,65 +29,76 @@ export const Popup = () => {
   };
 
   useEffect(() => {
-    // Check if we have a saved setting for this site
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      const activeTab = tabs[0];
-      if (activeTab?.url && activeTab.id) {
-        try {
-          const hostname = new URL(activeTab.url).hostname;
-          const tabTitle = activeTab.title || "Fixed PWA";
+    // Initialize popup: Inject script -> Get Defaults -> Load Settings
+    const init = async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id || !tab?.url) return;
 
-          // Set initial defaults from tab info immediately
-          // This ensures we have values even if content script fails
-          setName(tabTitle);
-          setShortName(tabTitle);
+      try {
+        // 1. Inject content script (idempotent-ish, or handle error if already there?)
+        // Since we removed content_scripts from manifest, we MUST inject it here.
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["content.js"],
+        });
 
-          // Get page defaults first
-          chrome.tabs.sendMessage(
-            activeTab.id,
-            { action: "get_manifest_defaults" },
-            async (defaults) => {
-              if (chrome.runtime.lastError || !defaults) {
-                console.warn("Could not get page defaults", chrome.runtime.lastError);
-              } else {
-                setPageDefaults(defaults);
-                // Update with values from page if available
-                setName((prev) => defaults.name || prev);
-                setShortName((prev) => defaults.short_name || prev);
-                setBgColor(defaults.background_color || "#ffffff");
-                setThemeColor(defaults.theme_color || "");
-              }
-
-              // Load from storage
-              const { siteSettings } = await StorageManager.get("siteSettings");
-              const saved = siteSettings[hostname];
-
-              if (saved) {
-                setStartUrl(saved.startUrl);
-                if (saved.name) setName(saved.name);
-                if (saved.shortName) setShortName(saved.shortName);
-                if (saved.backgroundColor) setBgColor(saved.backgroundColor);
-                if (saved.themeColor) setThemeColor(saved.themeColor);
-              } else {
-                if (!startUrl) getCurrentTabUrl(false);
-              }
-            },
-          );
-
-          // Check install status
-          chrome.tabs.sendMessage(activeTab.id, { action: "check_install_status" }, (response) => {
+        // 2. Get Page Defaults from content script
+        const defaults: any = await new Promise((resolve) => {
+          chrome.tabs.sendMessage(tab.id!, { action: "get_manifest_defaults" }, (response) => {
             if (chrome.runtime.lastError) {
-              return;
-            }
-            if (response && response.ready) {
-              setIsInstallReady(true);
+              console.warn("Error getting defaults:", chrome.runtime.lastError);
+              resolve({});
+            } else {
+              resolve(response || {});
             }
           });
-        } catch {
-          getCurrentTabUrl(false);
+        });
+
+        setPageDefaults(defaults);
+
+        // 3. Load saved settings from storage
+        const hostname = new URL(tab.url).hostname;
+        const { siteSettings } = await StorageManager.get("siteSettings");
+        const saved = siteSettings?.[hostname];
+
+        // 4. Update UI state
+        // Priority: Saved Settings > Page Defaults > Tab Info
+        const tabTitle = tab.title || "Fixed PWA";
+
+        // Name & Short Name
+        setName(saved?.name || defaults.name || tabTitle);
+        setShortName(saved?.shortName || defaults.short_name || tabTitle);
+
+        // Colors
+        setBgColor(saved?.backgroundColor || defaults.background_color || "#ffffff");
+        setThemeColor(saved?.themeColor || defaults.theme_color || "");
+
+        // Start URL
+        if (saved?.startUrl) {
+          setStartUrl(saved.startUrl);
+        } else {
+          try {
+            const urlObj = new URL(tab.url);
+            setStartUrl(urlObj.origin);
+          } catch {
+            setStartUrl(tab.url);
+          }
         }
+
+        // 5. Check install status
+        chrome.tabs.sendMessage(tab.id, { action: "check_install_status" }, (response) => {
+          if (!chrome.runtime.lastError && response?.ready) {
+            setIsInstallReady(true);
+          }
+        });
+      } catch (err) {
+        console.error("Initialization failed:", err);
+        setStatus("error");
+        setStatusMsg("Failed to initialize. Try refreshing the page.");
       }
-    });
+    };
+
+    init();
   }, []);
 
   const handleApply = async () => {

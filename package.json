@@ -7,7 +7,8 @@
     "dev": "bun run build.ts --watch",
     "start": "bun run build.ts --watch",
     "build": "bun run build.ts",
-    "pack": "bun run build.ts && cd dist && zip -r extension.zip ."
+    "pack": "bun run build.ts && cd dist && zip -r extension.zip .",
+    "publish": "rm -rf dist/ && bun run build && bun run pack"
   },
   "dependencies": {
     "bun-plugin-tailwind": "^0.1.2",
